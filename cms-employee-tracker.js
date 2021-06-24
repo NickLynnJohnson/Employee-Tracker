@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "Enterpasswordhere",
+    password: "Enterpwhere",
     database: "cms_employee_tracker_db"
   });
   
@@ -84,7 +84,23 @@ function initiateMenu(){
 // The "add" functions
 
 function addDepartment() {
-    // make a commit here first...
+    // This function adds a new department to the department list...
+    inquirer.prompt({
+        // Ask the user to enter the name of the department they want added
+        name: "departmentName",
+        type: "input",
+        message: "Enter the new department name:"
+
+    }).then((answer) => {
+        // Take the input and add it to the db
+        var sqlQuery = "INSERT INTO department(name) VALUES (?)";
+        connection.query(sqlQuery, answer.departmentName, (err, res) => {
+            if (err) throw err;
+            console.log("\n The new department name " + "'" + answer.departmentName + "'" + " has been added...\n ");
+            initiateMenu();
+        });
+
+    });
 }
 
 
@@ -92,8 +108,8 @@ function addDepartment() {
 
 function viewDepartment() {
     // This function simply lists all departments that exist...
-    var query = "SELECT * FROM department";
-    connection.query(query, function(err, res) {
+    var sqlQuery = "SELECT * FROM department";
+    connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
         console.table(res);
         // Then reinitiate the Menu so the user can take more actions
@@ -103,8 +119,8 @@ function viewDepartment() {
 
 function viewRoles() {
     // This function simply lists all roles that exist...
-    var query = "SELECT * FROM role";
-    connection.query(query, function(err, res) {
+    var sqlQuery = "SELECT * FROM role";
+    connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
         console.table(res);
         // Then reinitiate the Menu so the user can take more actions
@@ -114,8 +130,8 @@ function viewRoles() {
 
 function viewEmployees() {
     // This function simply lists all employees that exist...
-    var query = "SELECT * FROM employee";
-    connection.query(query, function(err, res) {
+    var sqlQuery = "SELECT * FROM employee";
+    connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
         console.table(res);
         // Then reinitiate the Menu so the user can take more actions
