@@ -273,7 +273,7 @@ function viewDepartment() {
 
 function viewRoles() {
     // This function simply lists all roles that exist...
-    var sqlQuery = "SELECT * FROM role";
+    var sqlQuery = "SELECT role.id, role.title, role.salary, department.department_name FROM role, department WHERE department.id = role.department_id";
     connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -284,7 +284,7 @@ function viewRoles() {
 
 function viewEmployees() {
     // This function simply lists all employees that exist...
-    var sqlQuery = "SELECT * FROM employee";
+    var sqlQuery = "SELECT employee.id AS 'Employee ID', employee.first_name AS 'First Name', employee.last_name AS 'Last Name', role.title AS 'Role Title', role.salary AS 'Role Salary', department.department_name AS 'Department', CONCAT(manager.first_name, ' ' , manager.last_name) AS 'Manager' FROM employee LEFT JOIN role ON role.id = employee.role_id LEFT JOIN department ON department.id = role.department_id LEFT JOIN employee AS manager ON manager.id = employee.manager_id";
     connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
         console.table(res);
@@ -292,3 +292,5 @@ function viewEmployees() {
         initiateMenu();
     });
 }
+
+// The "update" functions (just one for now)
