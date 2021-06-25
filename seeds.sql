@@ -41,7 +41,7 @@ VALUES (2, "Accountant", 60000, 9);
 
 -- -- Employee seed -- --
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
-VALUES (1, "Steve", "Smith", 1, null);
+VALUES (1, "Steve", "Smith", 1, 3);
 
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
 VALUES (2, "Bob", "Bretherton", 2, 1);
