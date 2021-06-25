@@ -1,10 +1,10 @@
 
-// (1/2) Bring in the tools needed
+// (1/2 of Setup) Bring in the tools needed
 
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-// (2/2) Establish the connection
+// (2/2 of Setup) Establish the connection
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -22,13 +22,14 @@ const connection = mysql.createConnection({
     initiateMenu();
   });
 
-// (All Else) After the connection is established, be able to use any of the following functions below (initiateMenu & the add, view, or update functions)
+// Now that the Setup is over, here are all the functions the user can interact with
 
 function initiateMenu(){
     // Prompt user with menu options
     inquirer
     .prompt({
         name: "action",
+        // Make this list a "rawlist" so that there are numbers and this helps the user know they are using the main menu which is the only view that uses rawlist
         type: "rawlist",
         message: "Main Menu:",
         choices: [
@@ -69,22 +70,21 @@ function initiateMenu(){
                 break;
             
             case "Update employee roles":
-                // functionName();
+                updateRole();
                 break; 
         }
     });
 }
 
-// Table of Contents:
+// Table of Contents (organized per assignment, versus how I would do it. I would do "view" first so that the user is prompted to learn the context before changing the context):
 // 1.) All the "add" functions
 // 2.) All the "view" functions
 // 3.) All the "update" functions (note: just one)
 
 
-// The "add" functions
+// 1.) The "add" functions
 
 function addDepartment() {
-    // This function adds a new department to the department list...
     inquirer.prompt([
         // Ask the user to enter the name of the department they want to add
         {
@@ -104,7 +104,6 @@ function addDepartment() {
 }
 
 function addRole() {
-    // This function adds a new role to the role list...
     // First, since it will eventually ask the user what department the new role will be in, have a department list array handy
     var listOfDepartments = [];
     var sqlQuery = "SELECT * FROM department";
@@ -161,8 +160,8 @@ function addRole() {
 }
 
 function addEmployee() {
-    // This function adds a new employee to the employee list...
     // Note: in the "addRole" function above I started with an sql query to populate the array of Departments so that all my prompts could be together. For the "addEmployee" function I haven't been able to figure out how to send two sql queries into connection.query so my following function is going to be a little backwards and not look as good :( Maybe whoever might review this will have a better solution than mine?
+    // Followup note: I eventually figured this out but I'm on a deadline to get this submitted and don't have time to refactor the following function's code. Oh well.
     // So with that said...start with the basic prompts first this time:
     inquirer.prompt([
         {
@@ -258,10 +257,10 @@ function addEmployee() {
         });
     });
 }
-// The "view" functions
+
+// 2.) The "view" functions
 
 function viewDepartment() {
-    // This function simply lists all departments that exist...
     var sqlQuery = "SELECT * FROM department";
     connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
@@ -272,7 +271,6 @@ function viewDepartment() {
 }
 
 function viewRoles() {
-    // This function simply lists all roles that exist...
     var sqlQuery = "SELECT role.id, role.title, role.salary, department.department_name FROM role, department WHERE department.id = role.department_id";
     connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
@@ -283,7 +281,7 @@ function viewRoles() {
 }
 
 function viewEmployees() {
-    // This function simply lists all employees that exist...
+    // Note: this function more than the other two really ties all the tables together into one view
     var sqlQuery = "SELECT employee.id AS 'Employee ID', employee.first_name AS 'First Name', employee.last_name AS 'Last Name', role.title AS 'Role Title', role.salary AS 'Role Salary', department.department_name AS 'Department', CONCAT(manager.first_name, ' ' , manager.last_name) AS 'Manager' FROM employee LEFT JOIN role ON role.id = employee.role_id LEFT JOIN department ON department.id = role.department_id LEFT JOIN employee AS manager ON manager.id = employee.manager_id";
     connection.query(sqlQuery, function(err, res) {
         if (err) throw err;
@@ -294,3 +292,92 @@ function viewEmployees() {
 }
 
 // The "update" functions (just one for now)
+
+function updateRole() {
+    // As with the other functions, we need to bring in the data the user needs to choose from and then present it to the user via a list
+    // Basically, just modify the viewEmployee function's sqlQuery
+    
+    var sqlQuery = "SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee LEFT JOIN role ON role.id = employee.role_id";
+
+    connection.query(sqlQuery, function(err, res) {
+        if (err) throw err;
+        var updateEmployeeNameList = [];
+        for (i = 0; i < res.length; i++){
+
+            updateEmployeeNameList.push(res[i].first_name + " " + res[i].last_name);
+
+            // Note: I would like to get fancier sometime and do something like this:
+            // updateEmployeeNameList.push("EID: " + res[i].id + " Employee: " + res[i].first_name + " " + res[i].last_name + " --- Currently --- " + res[i].title);
+        }
+
+        inquirer.prompt([
+            {
+            name: "employeeDefaultNames",
+            type: "list",
+            message: "Select the employee you would like to update:",
+            choices: updateEmployeeNameList
+            },
+        ]).then(function(updateNameAnswer) {
+
+            // Like with the other functions, store this ".then" answer and convert it into an id, because we need to do one more prompt/".then" in a second
+            var pickedNameID;
+            for (i = 0; i < res.length; i++) {
+                if (updateNameAnswer.employeeDefaultNames === (res[i].first_name + " " + res[i].last_name)) {
+                    pickedNameID = res[i].id; 
+                }
+            }
+        
+            // We now need a list of all possible roles ever, not just a list of roles that are attached to actual employees. Therefore, we need to query the roles db table to get the full list
+
+            var sqlQuery = "SELECT role.id, role.title, role.salary FROM role";
+
+            connection.query(sqlQuery, function(err, res) {
+                if (err) throw err;
+                var chooseRoleList = [];
+                for (i = 0; i < res.length; i++){
+
+                    chooseRoleList.push(res[i].title);
+
+                    // Note: I would like to get fancier sometime and do something like this:
+                    // chooseRoleList.push(res[i].title + " --- " + "$" + res[i].salary);
+                }
+
+                inquirer.prompt([
+                    {
+                    name: "chooseRoleList",
+                    type: "list",
+                    message: "Select the new role from this list that you would like the employee to have:",
+                    choices: chooseRoleList
+                    },
+                ]).then(function(updateRoleAnswer) {
+                
+                    // Might as well capture this answer for consistency's sake here and convert the title into an id for ease of use
+                    var pickedRoleID;
+                    for (i = 0; i < res.length; i++) {
+                        if (updateRoleAnswer.chooseRoleList === res[i].title) {
+                            pickedRoleID = res[i].id; 
+                            
+                        }
+                    }
+
+                    // Switch the RoleID and NameIDs for the query coming up
+                    var promptValues = [
+                        pickedRoleID,
+                        pickedNameID   
+                    ]
+                    
+                    // Tell the db what needs to get updated
+                    var sqlQuery = "UPDATE employee SET employee.role_id = ? WHERE employee.id = ?";
+                    connection.query(sqlQuery, promptValues, function(err, res) {
+                        if (err) throw err;
+
+                        // Yes, I should probably make this more user-friendly/add some more details here at some point...
+                        console.table("The employee has been updated with a new role.");
+                        // Then reinitiate the Menu so the user can take more actions
+                        initiateMenu();
+                    });
+                });
+            });
+        });
+    });
+}
