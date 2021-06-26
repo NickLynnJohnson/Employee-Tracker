@@ -1,8 +1,6 @@
 # Employee-Tracker
 
-Insert Movie of application running here...
-
-<!--![Project-2-Generic](./public/assets/img/Project-2-Generic-Homepage.png?raw=true "Project 2 Generic")-->
+![Employee-Tracker](./assets/employee-tracker.gif?raw=true "Employee Tracker")
 
 ## Description
 
@@ -16,18 +14,20 @@ Of note: The database comes pre-loaded with sample data for demonstration purpos
 
 ## Installation
 
-1. Clone the repository from github to your local server: "gh repo clone NickLynnJohnson/Employee-Tracker".
-2. Install node packages: "npm install"
-3. Run the application the terminal: "npm run start"
+1. Clone the repository from github: "https://github.com/NickLynnJohnson/Employee-Tracker.git".
+2. Install the node packages: "npm install"
+3. Create the database through MySQL Workbench by running the "schema.sql" file
+4. Seed the database by then also running "seeds.sql" file
+5. Run the application in the terminal: "node cms-employee-tracker.js"
 
-## Usage
+## Technologies Used
 
-**Technologies Used**
 * Node
 * Inquirer
 * MySQL
 
-**Contributors:**
+## Author/Programmer
+
 * Nick Johnson
 
 ## License
